@@ -1,0 +1,85 @@
+Project 8 Config:
+
+HQ Router Configuration
+enable
+configure terminal
+
+! HQ VLAN Interfaces
+interface g0/0
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+exit
+
+interface g0/0.20
+ ip address 192.168.20.1 255.255.255.0
+exit
+
+interface g0/0.30
+ ip address 192.168.30.1 255.255.255.0
+exit
+
+! WAN to Branch
+interface g0/1
+ ip address 10.0.0.1 255.255.255.0
+ no shutdown
+exit
+
+! Static route to Branch LAN
+ip route 192.168.40.0 255.255.255.0 10.0.0.2
+
+! DHCP exclusions
+ip dhcp excluded-address 192.168.10.1
+ip dhcp excluded-address 192.168.20.1
+ip dhcp excluded-address 192.168.30.1
+ip dhcp excluded-address 192.168.40.1
+
+! DHCP Pools
+ip dhcp pool HR
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 8.8.8.8
+exit
+
+ip dhcp pool IT
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 8.8.8.8
+exit
+
+ip dhcp pool FINANCE
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 8.8.8.8
+exit
+
+ip dhcp pool BRANCH
+ network 192.168.40.0 255.255.255.0
+ default-router 192.168.40.1
+ dns-server 8.8.8.8
+exit
+
+end
+write memory
+
+Branch Router Configuration
+enable
+configure terminal
+
+! Branch LAN
+interface g0/0
+ ip address 192.168.40.1 255.255.255.0
+ ip helper-address 10.0.0.1
+ no shutdown
+exit
+
+! WAN to HQ
+interface g0/1
+ ip address 10.0.0.2 255.255.255.0
+ no shutdown
+exit
+
+! Default route to HQ
+ip route 0.0.0.0 0.0.0.0 10.0.0.1
+
+end
+write memory
